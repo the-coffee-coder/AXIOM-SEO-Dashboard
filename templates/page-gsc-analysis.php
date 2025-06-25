@@ -27,12 +27,13 @@ $links  = [
 			  global $wpdb;
 			  $rows = $wpdb->get_results( "SELECT id, name, site_url FROM {$wpdb->prefix}scc_clients ORDER BY name ASC" );
 			  foreach ( $rows as $client ) {
-				printf(
-				  '<option value="%1$s">%2$s</option>',
-				  intval($client->id),
-				  esc_html( $client->name )
-				);
-			  }
+				  printf(
+					'<option value="%1$s" data-site="%2$s">%3$s</option>',
+					intval($client->id),
+					esc_attr($client->site_url),
+					esc_html( $client->name )
+				  );
+				}
 			  ?>
 			</select>
 		</div>
