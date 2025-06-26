@@ -8,6 +8,8 @@ $links  = [
     'ads-overview'  => add_query_arg('client_id', $client, $base . 'ads-overview'),
     'moz-overview'  => add_query_arg('client_id', $client, $base . 'moz-overview'),
 ];
+$end_date   = date('Y-m-d');
+$start_date = date('Y-m-d', strtotime('-29 days')); // includes today
 // The $main_content variable should be set by the including script
 ?>
 <!DOCTYPE html>
@@ -46,6 +48,12 @@ $links  = [
                     <input type="date" id="date-range-end" name="date-range-end" style="margin-left: 4px;">
                 </div>
             </div>
+			<div id="date-range-container" style="margin-bottom: 20px;">
+				<label for="date-range" style="font-weight: 600; margin-right: 8px;">Date Range:</label>
+				<input type="date" id="date-range-start" name="date-range-start" value="<?php echo esc_attr($start_date); ?>" style="margin-right: 4px;">
+				to
+				<input type="date" id="date-range-end" name="date-range-end" value="<?php echo esc_attr($end_date); ?>" style="margin-left: 4px;">
+			</div>
             <ul>
                 <?php foreach ($links as $slug => $url): ?>
                     <li><a href="<?php echo esc_url($url); ?>" data-slug="<?php echo esc_attr($slug); ?>"><?php echo esc_html(ucwords(str_replace('-', ' ', $slug))); ?></a></li>
