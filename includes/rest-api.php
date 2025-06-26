@@ -109,10 +109,10 @@ function gsc_analysis_data_ajax() {
     if ($device == 'mobile' || $device == 'desktop') {
         $device_sql = $wpdb->prepare("AND device = %s", $device);
     }
-    $where = $wpdb->prepare("client_id = %d AND date BETWEEN %s AND %s", $client_id, $date_start, $date_end);
+    $where = $wpdb->prepare("client_id = %d AND snapshot_date BETWEEN %s AND %s", $client_id, $date_start, $date_end);
     $where .= $device_sql;
 
-    $sql = "SELECT keyword, SUM(clicks) as clicks, SUM(impressions) as impressions, AVG(ctr) as ctr, AVG(position) as position
+    $sql = "SELECT query, SUM(clicks) as clicks, SUM(impressions) as impressions, AVG(ctr) as ctr, AVG(position) as position
             FROM {$wpdb->prefix}scc_gsc_history
             WHERE $where
             GROUP BY keyword";

@@ -17,10 +17,12 @@ ob_start();
     <button id="gsc-keyword-toggle-btn">Show Only Highlighted</button>
   </div>
   <!-- Widgets -->
-  <div id="gsc-widgets-all" class="gsc-widget-row"></div>
-  <div id="gsc-widgets-buckets" class="gsc-widget-row"></div>
-  <div id="gsc-widgets-highlighted" class="gsc-widget-row"></div>
-  <div id="gsc-widgets-buckets-highlighted" class="gsc-widget-row"></div>
+  <div id="gsc-widget-contianer" style="margin-bottom: 1em;">
+    <div id="gsc-widgets-all" class="gsc-widget-row"></div>
+    <div id="gsc-widgets-buckets" class="gsc-widget-row"></div>
+    <div id="gsc-widgets-highlighted" class="gsc-widget-row"></div>
+    <div id="gsc-widgets-buckets-highlighted" class="gsc-widget-row"></div>
+  </div>
   <!-- Data Table -->
   <div id="gsc-table-container">
     <table id="gsc-keywords-table" class="wp-list-table widefat fixed striped">
