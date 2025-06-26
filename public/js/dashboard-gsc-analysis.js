@@ -2,12 +2,12 @@ jQuery(function($){
     let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = [];
 
     function fetchData() {
-        let client_id = $('#scc-client-select').val();
+        let client_id = $('#scc-client-select option:selected').val();
         let date_start = $('#date-range-start').val();
         let date_end = $('#date-range-end').val();
         let search = $('#gsc-keyword-search').val();
         let exclude = $('#gsc-keyword-exclude').val();
-		console.log(date_start + ' - ' + date_end);
+		console.log('Client ID: ' + client_id);
         $.post(ajaxurl, {
             action: 'gsc_analysis_data',
             client_id, device: currentDevice,
@@ -24,7 +24,7 @@ jQuery(function($){
         rows.forEach(row => {
             let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
             body += `<tr class="${highlight}" data-keyword="${row.keyword}">
-                <td>${row.keyword}</td>
+                <td>${row.query}</td>
                 <td>${row.clicks}</td>
                 <td>${row.impressions}</td>
                 <td>${parseFloat(row.ctr).toFixed(2)}%</td>
