@@ -6,4 +6,4 @@ ob_start();
 </main>
 <?php
 $main_content = ob_get_clean();
-include '/dashboard-skeleton.php';
+include __DIR__ . '/dashboard-skeleton.php';

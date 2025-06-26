@@ -41,12 +41,6 @@ $start_date = date('Y-m-d', strtotime('-29 days')); // includes today
                     ?>
                 </select>
                 <!-- Date Range Field -->
-                <div id="date-range-container" style="margin-bottom: 20px;">
-                    <label for="date-range" style="font-weight: 600; margin-right: 8px;">Date Range:</label>
-                    <input type="date" id="date-range-start" name="date-range-start" style="margin-right: 4px;">
-                    to
-                    <input type="date" id="date-range-end" name="date-range-end" style="margin-left: 4px;">
-                </div>
             </div>
 			<div id="date-range-container" style="margin-bottom: 20px;">
 				<label for="date-range" style="font-weight: 600; margin-right: 8px;">Date Range:</label>
