@@ -106,22 +106,21 @@ function gsc_analysis_data_ajax() {
 	$exclude_terms = array_filter(array_map('trim', explode(',', strtolower($exclude))));
 
     $device_sql = '';
-    if ($device == 'mobile' || $device == 'desktop') {
-        $device_sql = $wpdb->prepare("AND device = %s", $device);
-    }
     $where = $wpdb->prepare("client_id = %d AND snapshot_date BETWEEN %s AND %s", $client_id, $date_start, $date_end);
-    $where .= $device_sql;
+	if ($device == 'mobile' || $device == 'desktop') {
+		$where .= $wpdb->prepare(" AND device = %s", $device);
+	}
 
-    $sql = "SELECT query, SUM(clicks) as clicks, SUM(impressions) as impressions, AVG(ctr) as ctr, AVG(position) as position
-            FROM {$wpdb->prefix}scc_gsc_history
-            WHERE $where
-            GROUP BY keyword";
+	$sql = "SELECT query AS keyword, SUM(clicks) as clicks, SUM(impressions) as impressions, AVG(ctr) as ctr, AVG(position) as position
+			FROM {$wpdb->prefix}scc_gsc_history
+			WHERE $where
+			GROUP BY query";
     $rows = $wpdb->get_results($sql);
 
     // Filter for search and exclude
 	$filtered = [];
 	foreach ($rows as $row) {
-		$kw = strtolower($row->keyword);
+		$kw = strtolower($row->query);
 
 		// Search: include if any term is found, or if search is empty
 		$include = empty($search_terms) || array_reduce($search_terms, function($carry, $term) use ($kw) {

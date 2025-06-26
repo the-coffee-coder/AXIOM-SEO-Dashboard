@@ -7,7 +7,7 @@ jQuery(function($){
         let date_end = $('#date-range-end').val();
         let search = $('#gsc-keyword-search').val();
         let exclude = $('#gsc-keyword-exclude').val();
-		console.log(date_start + ' - ' date_end);
+		console.log(date_start + ' - ' + date_end);
         $.post(ajaxurl, {
             action: 'gsc_analysis_data',
             client_id, device: currentDevice,
