@@ -94,3 +94,11 @@ add_action( 'wp_enqueue_scripts', function() {
         ] );
     }
 }, 20 );
+
+function enqueue_gsc_analysis_js() {
+    if (is_page_template('page-gsc-analysis.php')) {
+        wp_enqueue_script('dashboard-gsc-analysis', get_template_directory_uri().'/public/js/dashboard-gsc-analysis.js', ['jquery'], null, true);
+        wp_localize_script('dashboard-gsc-analysis', 'ajaxurl', admin_url('admin-ajax.php'));
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_gsc_analysis_js');
