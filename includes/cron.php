@@ -1,5 +1,4 @@
 <?php
-// File: includes/cron.php
 if ( ! defined('ABSPATH') ) exit;
 
 // Hook the action to our handler
@@ -37,7 +36,7 @@ function scc_handle_daily_gsc_fetch() {
 				  raw_json    = VALUES(raw_json)
 			",
 			  $c->id,
-			  $range['startDate'],             // or $yesterday in your cron
+			  $row['keys'][0],             // or $yesterday in your cron
 			  sanitize_text_field($row['keys'][1] ?? ''),
 			  esc_url_raw($row['keys'][2] ?? ''),
 			  sanitize_text_field($row['keys'][3] ?? ''),

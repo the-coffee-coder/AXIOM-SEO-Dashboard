@@ -148,8 +148,8 @@ add_action( 'wp_ajax_scc_fetch_history', function(){
     check_admin_referer( 'scc_fetch_history_'.$cid );
 
     // 1 year back
-    $end   = date('Y-m-d', strtotime('-31 day'));
-    $start = date('Y-m-d', strtotime('-66 day'));
+    $end   = date('Y-m-d', strtotime('-1 day'));
+    $start = date('Y-m-d', strtotime('-31 day'));
 
     // Get client URL
     global $wpdb;
@@ -172,8 +172,8 @@ add_action( 'wp_ajax_scc_fetch_history', function(){
 			  position    = VALUES(position),
 			  raw_json    = VALUES(raw_json)
 		",
-		  $c->id,
-		  $range['startDate'],             // or $yesterday in your cron
+		  $cid,
+		  $row['keys'][0],             // or $yesterday in your cron
 		  sanitize_text_field($row['keys'][1] ?? ''),
 		  esc_url_raw($row['keys'][2] ?? ''),
 		  sanitize_text_field($row['keys'][3] ?? ''),

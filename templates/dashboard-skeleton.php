@@ -3,6 +3,7 @@
 $client = get_query_var('client_id');
 $base   = get_permalink();
 $links  = [
+	'seo-dashboard'  => add_query_arg('client_id', $client, $base . 'seo-dashboard'),
     'gsc-analysis'  => add_query_arg('client_id', $client, $base . 'gsc-analysis'),
     'ga4-overview'  => add_query_arg('client_id', $client, $base . 'ga4-overview'),
     'ads-overview'  => add_query_arg('client_id', $client, $base . 'ads-overview'),
