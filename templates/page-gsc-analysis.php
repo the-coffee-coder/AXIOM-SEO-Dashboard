@@ -29,12 +29,12 @@ ob_start();
       <thead>
 		  <tr>
 			<th class="row-number">#</th>
-			<th data-sort="keyword">Keyword</th>
-			<th data-sort="clicks">Clicks</th>
-			<th data-sort="impressions">Impressions</th>
-			<th data-sort="ctr">CTR</th>
-			<th data-sort="position">Position</th>
-			<th data-sort="search_volume">Search Volume</th>
+			<th data-sort="keyword">Keyword <span class="sort-indicator"></span></th>
+			<th data-sort="clicks">Clicks <span class="sort-indicator"></span></th>
+			<th data-sort="impressions">Impressions <span class="sort-indicator"></span></th>
+			<th data-sort="ctr">CTR <span class="sort-indicator"></span></th>
+			<th data-sort="position">Position <span class="sort-indicator"></span></th>
+			<th data-sort="search_volume">Search Volume <span class="sort-indicator"></span></th>
 		  </tr>
 	  </thead>
       <tbody>

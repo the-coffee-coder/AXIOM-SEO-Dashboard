@@ -11,8 +11,17 @@
 #organic-search{ width:100%; }
 #gsc-table-container{ padding: 2%; }
 #gsc-table-container td{ padding: 5px 10px; }
-#gsc-table-container th{ padding: 10px 10px 10px 5px; text-align: left; font-weight: 600; background-color: #666; color: white; }
-.row-number{ width: 2%;}
+#gsc-table-container th{ padding: 10px 10px 10px 5px; text-align: left; font-weight: 600; background-color: #000; color: white; }
+#gsc-keywords-table th[data-sort] {
+    cursor: pointer;
+    position: relative;
+}
+#gsc-keywords-table th[data-sort] .sort-indicator {
+    margin-left: 4px;
+    font-size: 0.7em;
+    color: #fff;
+}
+.row-number{ width: 20px;}
 .keyword{ width: 48%; }
 .clicks, .impressions, .ctr, .position, .search-volume{ width: 10%; }
 #gsc-widget-contianer{ flex: 1; padding: 20px; display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 20px; height:300px; }

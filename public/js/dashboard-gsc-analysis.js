@@ -42,8 +42,6 @@ function fetchData() {
     });
 }
 
-
-
 function renderTable(rows, filtered) {
     currentRows = rows.slice();
     let body = '';
@@ -94,6 +92,13 @@ $('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
 
     // Use currentFiltered for the second argument
     renderTable(sortedRows, currentFiltered);
+	
+	// Clear all indicators
+	$('#gsc-keywords-table th[data-sort] .sort-indicator').text('');
+
+	// Set indicator on the sorted column
+	let indicator = sortState.asc ? '▲' : '▼';
+	$(`#gsc-keywords-table th[data-sort="${sortState.column}"] .sort-indicator`).text(indicator);
 });
 
 function renderWidgets(all, filtered){
