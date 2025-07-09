@@ -2,22 +2,39 @@ jQuery(function($){
     let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = [];
 
     function fetchData() {
-        let client_id = $('#scc-client-select option:selected').val();
-        let date_start = $('#date-range-start').val();
-        let date_end = $('#date-range-end').val();
-        let search = $('#gsc-keyword-search').val();
-        let exclude = $('#gsc-keyword-exclude').val();
-		console.log('Client ID: ' + client_id);
-        $.post(ajaxurl, {
-            action: 'gsc_analysis_data',
-            client_id, device: currentDevice,
-            date_start, date_end, search, exclude
-        }, function(response){
-            renderTable(response.data, response.filtered);
-            renderWidgets(response.all_stats, response.filtered_stats);
-            renderBuckets(response.buckets, response.buckets_high);
-        });
+    // Try to get client_id from the dropdown first
+    let client_id = $('#scc-client-select option:selected').val();
+
+    // If dropdown is blank/null/empty, try to get it from the URL (GET variable)
+    if (!client_id) {
+        // Function to get query parameter by name
+        function getQueryParam(name) {
+            let url = window.location.href;
+            name = name.replace(/[[]]/g, "\\$&");
+            let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+            let results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        client_id = getQueryParam('client_id');
     }
+
+    let date_start = $('#date-range-start').val();
+    let date_end = $('#date-range-end').val();
+    let search = $('#gsc-keyword-search').val();
+    let exclude = $('#gsc-keyword-exclude').val();
+
+    $.post(ajaxurl, {
+        action: 'gsc_analysis_data',
+        client_id, device: currentDevice,
+        date_start, date_end, search, exclude
+    }, function(response){
+        renderTable(response.data, response.filtered);
+        renderWidgets(response.all_stats, response.filtered_stats);
+        renderBuckets(response.buckets, response.buckets_high);
+    });
+}
 
     function renderTable(rows, filtered) {
         let body = '';
