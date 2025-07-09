@@ -48,6 +48,7 @@ $start_date = date('Y-m-d', strtotime('-29 days')); // includes today
 				<input type="date" id="date-range-start" name="date-range-start" value="<?php echo esc_attr($start_date); ?>" style="margin-right: 4px;">
 				to
 				<input type="date" id="date-range-end" name="date-range-end" value="<?php echo esc_attr($end_date); ?>" style="margin-left: 4px;">
+				<button id="update-gsc-daterange">Update</button>
 			</div>
             <ul>
                 <?php foreach ($links as $slug => $url): ?>

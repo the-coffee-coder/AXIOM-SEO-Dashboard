@@ -41,22 +41,36 @@ jQuery(function($){
         rows.forEach(row => {
             let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
             body += `<tr class="${highlight}" data-keyword="${row.keyword}">
-                <td>${row.query}</td>
-                <td>${row.clicks}</td>
-                <td>${row.impressions}</td>
-                <td>${parseFloat(row.ctr).toFixed(2)}%</td>
-                <td>${parseFloat(row.position).toFixed(2)}</td>
-                <td></td>
+                <td class="keyword">${row.query}</td>
+                <td class="clicks">${row.clicks}</td>
+                <td class="impressions">${row.impressions}</td>
+                <td class="ctr">${parseFloat(row.ctr).toFixed(2)}%</td>
+                <td class=""positon>${parseFloat(row.position).toFixed(2)}</td>
+                <td class="search-volume"></td>
             </tr>`;
         });
         $('#gsc-keywords-table tbody').html(body);
     }
     function renderWidgets(all, filtered){
         $('#gsc-widgets-all').html(
-            `<div>All: ${all.unique} keywords, ${all.clicks} clicks, ${all.impressions} impressions, ${all.ctr.toFixed(2)}% CTR, Pos ${all.position.toFixed(2)}</div>`
+            `<div>
+				<br><h3>All Keywords</h3>
+				<br>${all.unique} keywords
+				<br>${all.clicks} clicks
+				<br>${all.impressions} impressions
+				<br>${all.ctr.toFixed(2)}% CTR
+				<br>Pos ${all.position.toFixed(2)}
+			</div>`
         );
         $('#gsc-widgets-highlighted').html(
-            `<div>Highlighted: ${filtered.unique} keywords, ${filtered.clicks} clicks, ${filtered.impressions} impressions, ${filtered.ctr.toFixed(2)}% CTR, Pos ${filtered.position.toFixed(2)}</div>`
+            `<div>
+				<br><h3>Highlighted Keywords</h3>
+				<br>${filtered.unique} keywords
+				<br>${filtered.clicks} clicks
+				<br>${filtered.impressions} impressions
+				<br>${filtered.ctr.toFixed(2)}% CTR
+				<br>Pos ${filtered.position.toFixed(2)}
+			</div>`
         );
     }
     function renderBuckets(buckets, buckets_high) {
@@ -72,7 +86,8 @@ jQuery(function($){
     });
 
     // Date range
-    $('#date-range-start, #date-range-end').on('change', fetchData);
+//    $('#date-range-start, #date-range-end').on('change', fetchData);
+	$('#update-gsc-daterange').on('click', fetchData);
 
     // Client select
     $('#scc-client-select').on('change', fetchData);
@@ -96,7 +111,7 @@ jQuery(function($){
     });
 
     // Row click highlight/unhighlight
-    $('#gsc-keywords-table').on('click', 'tr', function(){
+    $('#gsc-keywords-table').on('click', 'tbody tr', function(){
         $(this).toggleClass('highlighted');
         // Optionally update highlighted widget
     });
