@@ -1,6 +1,6 @@
 jQuery(function($){
 	
-let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = [];
+let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = new Set();
 let currentRows = [];
 let currentFiltered = [];
 let sortState = { column: null, asc: true };
@@ -30,7 +30,7 @@ function getSortedRows(rows) {
     return sortedRows;
 }
 
-function fetchData() {
+function fetchData(highlightBySearch = false) {
     // Try to get client_id from the dropdown first
     let client_id = $('#scc-client-select option:selected').val();
 
@@ -61,17 +61,32 @@ function fetchData() {
     }, function(response){
         currentRows = response.data.slice();
         currentFiltered = response.filtered.slice();
-        renderTable(currentRows, currentFiltered);
+		
+        // Only highlight by search if this fetch was triggered by keyword search
+        let rowsToRender = getSortedRows(currentRows);
+        renderTable(rowsToRender, currentFiltered, highlightBySearch);
+		
         renderWidgets(response.all_stats, response.filtered_stats);
         renderBuckets(response.buckets, response.buckets_high);
     });
 }
 
-function renderTable(rows, filtered) {
+function renderTable(rows, filtered, highlightBySearch = false) {
     currentRows = rows.slice();
     let body = '';
+
+    // If this render is due to a keyword search, build a set of keywords to highlight
+    let searchHighlightSet = new Set();
+    if (highlightBySearch && filtered && filtered.length) {
+        filtered.forEach(row => searchHighlightSet.add(row.keyword));
+    }
+
     rows.forEach((row, idx) => {
-        let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
+        // Highlight if this row's keyword is in the highlighted set (click) or matches the searchHighlightSet (search)
+        let isClicked = highlightedKeywords.has(row.keyword);
+        let isSearchMatch = searchHighlightSet.has(row.keyword);
+
+        let highlight = (highlightBySearch ? isSearchMatch : isClicked) ? 'highlighted' : '';
         let ctrPercent = (parseFloat(row.ctr) * 100).toFixed(2);
         body += `<tr class="${highlight}" data-keyword="${row.keyword}">
             <td class="row-number">${idx + 1}</td>
@@ -84,6 +99,13 @@ function renderTable(rows, filtered) {
         </tr>`;
     });
     $('#gsc-keywords-table tbody').html(body);
+
+    // Update sort indicators
+    $('#gsc-keywords-table th[data-sort]').removeClass('sorted-asc sorted-desc');
+    if (sortState.column) {
+        const $th = $(`#gsc-keywords-table th[data-sort="${sortState.column}"]`);
+        $th.addClass(sortState.asc ? 'sorted-asc' : 'sorted-desc');
+    }
 }
 
 // Sort click handler
@@ -143,23 +165,32 @@ function renderWidgets(all, filtered){
         $('.gsc-device-btn').removeClass('active');
         $(this).addClass('active');
         currentDevice = $(this).data('device');
-        fetchData();
+        fetchData(false);
     });
 
     // Date range
-//    $('#date-range-start, #date-range-end').on('change', fetchData);
-	$('#update-gsc-daterange').on('click', fetchData);
+	$('#update-gsc-daterange').on('click', function(){
+		fetchData(false);
+	});
 
     // Client select
-    $('#scc-client-select').on('change', fetchData);
+    $('#scc-client-select').on('change', function(){
+		fetchData(false);
+	});
 
     // Search & reset
-    $('#gsc-keyword-search-btn').on('click', fetchData);
-    $('#gsc-keyword-reset-btn').on('click', function(){
-        $('#gsc-keyword-search, #gsc-keyword-exclude').val('');
-        showingHighlighted = false;
-        fetchData();
-    });
+    $('#gsc-keyword-search-btn').on('click', function() {
+		// After fetchData, renderTable will be called with highlightBySearch = true
+		fetchData(true);
+	});
+	
+    // Update the other calls to fetchData() (e.g. reset, device, date, etc.) to NOT highlight by search:
+	$('#gsc-keyword-reset-btn').on('click', function(){
+		$('#gsc-keyword-search, #gsc-keyword-exclude').val('');
+		showingHighlighted = false;
+		highlightedKeywords.clear(); // clear all highlights on reset
+		fetchData(false);
+	});
 
     // Toggle highlighted
     $('#gsc-keyword-toggle-btn').on('click', function() {
@@ -173,10 +204,16 @@ function renderWidgets(all, filtered){
 
     // Row click highlight/unhighlight
     $('#gsc-keywords-table').on('click', 'tbody tr', function(){
-        $(this).toggleClass('highlighted');
-        // Optionally update highlighted widget
-    });
+		const keyword = $(this).data('keyword');
+		if (highlightedKeywords.has(keyword)) {
+			highlightedKeywords.delete(keyword);
+			$(this).removeClass('highlighted');
+		} else {
+			highlightedKeywords.add(keyword);
+			$(this).addClass('highlighted');
+		}
+	});
 
     // Initial fetch
-    fetchData();
+    fetchData(false);
 });
