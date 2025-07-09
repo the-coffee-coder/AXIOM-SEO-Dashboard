@@ -4,7 +4,32 @@ let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = []
 let currentRows = [];
 let currentFiltered = [];
 let sortState = { column: null, asc: true };
-	
+
+// Sorting logic as its own function
+function getSortedRows(rows) {
+    if (!sortState.column) return rows.slice(); // No sorting, return as-is
+
+    let sortKey = sortState.column;
+    let sortedRows = rows.slice();
+    sortedRows.sort((a, b) => {
+        let vA = a[sortKey];
+        let vB = b[sortKey];
+
+        if (['clicks', 'impressions', 'ctr', 'position', 'search_volume'].includes(sortKey)) {
+            vA = parseFloat(vA) || 0;
+            vB = parseFloat(vB) || 0;
+        } else if (typeof vA === 'string' && typeof vB === 'string') {
+            vA = vA.toLowerCase();
+            vB = vB.toLowerCase();
+        }
+
+        if (vA < vB) return sortState.asc ? -1 : 1;
+        if (vA > vB) return sortState.asc ? 1 : -1;
+        return 0;
+    });
+    return sortedRows;
+}
+
 function fetchData() {
     // Try to get client_id from the dropdown first
     let client_id = $('#scc-client-select option:selected').val();
@@ -61,6 +86,7 @@ function renderTable(rows, filtered) {
     $('#gsc-keywords-table tbody').html(body);
 }
 
+// Sort click handler
 $('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
     let sortKey = $(this).data('sort');
     if (!sortKey) return;
@@ -72,24 +98,8 @@ $('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
         sortState.asc = true;
     }
 
-    let sortedRows = currentRows.slice();
-    sortedRows.sort((a, b) => {
-        let vA = a[sortKey];
-        let vB = b[sortKey];
-
-        if (['clicks', 'impressions', 'ctr', 'position', 'search_volume'].includes(sortKey)) {
-            vA = parseFloat(vA) || 0;
-            vB = parseFloat(vB) || 0;
-        } else if (typeof vA === 'string' && typeof vB === 'string') {
-            vA = vA.toLowerCase();
-            vB = vB.toLowerCase();
-        }
-
-        if (vA < vB) return sortState.asc ? -1 : 1;
-        if (vA > vB) return sortState.asc ? 1 : -1;
-        return 0;
-    });
-
+    let sortedRows = getSortedRows(currentRows);
+	
     renderTable(sortedRows, currentFiltered);
 
     // Remove all sort classes, then add to the sorted column

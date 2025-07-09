@@ -58,13 +58,13 @@ ob_start();
 			<span class="arrow arrow-down"></span>
 		  </span>
 		</th>
-		<th data-sort="ctr">CTR
+		<th data-sort="ctr">Avg. CTR
 		  <span class="sort-indicator">
 			<span class="arrow arrow-up"></span>
 			<span class="arrow arrow-down"></span>
 		  </span>
 		</th>
-		<th data-sort="position">Position
+		<th data-sort="position">Avg. Position
 		  <span class="sort-indicator">
 			<span class="arrow arrow-up"></span>
 			<span class="arrow arrow-down"></span>
