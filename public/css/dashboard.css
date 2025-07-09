@@ -18,7 +18,32 @@
 }
 #gsc-keywords-table th[data-sort] .sort-indicator {
     margin-left: 4px;
-    font-size: 0.7em;
+    font-size: 0.85em;
+    display: inline-block;
+}
+.arrow {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    line-height: 10px;
+    font-size: 10px;
+    color: #bbb;
+    transition: color 0.2s;
+}
+.arrow-up::before {
+    content: '\25B2';
+    display: inline-block;
+}
+.arrow-down::before {
+    content: '\25BC';
+    display: inline-block;
+}
+th[data-sort].sorted-asc .arrow-up,
+th[data-sort]:hover .arrow-up {
+    color: #fff;
+}
+th[data-sort].sorted-desc .arrow-down,
+th[data-sort]:hover .arrow-down {
     color: #fff;
 }
 .row-number{ width: 20px;}

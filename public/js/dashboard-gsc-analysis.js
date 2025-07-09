@@ -90,15 +90,13 @@ $('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
         return 0;
     });
 
-    // Use currentFiltered for the second argument
     renderTable(sortedRows, currentFiltered);
-	
-	// Clear all indicators
-	$('#gsc-keywords-table th[data-sort] .sort-indicator').text('');
 
-	// Set indicator on the sorted column
-	let indicator = sortState.asc ? '▲' : '▼';
-	$(`#gsc-keywords-table th[data-sort="${sortState.column}"] .sort-indicator`).text(indicator);
+    // Remove all sort classes, then add to the sorted column
+    $('#gsc-keywords-table th[data-sort]')
+      .removeClass('sorted-asc sorted-desc');
+    let $th = $(`#gsc-keywords-table th[data-sort="${sortState.column}"]`);
+    $th.addClass(sortState.asc ? 'sorted-asc' : 'sorted-desc');
 });
 
 function renderWidgets(all, filtered){
