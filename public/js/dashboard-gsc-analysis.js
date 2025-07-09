@@ -37,42 +37,48 @@ jQuery(function($){
 }
 
     function renderTable(rows, filtered) {
-        let body = '';
-        rows.forEach(row => {
-            let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
-            body += `<tr class="${highlight}" data-keyword="${row.keyword}">
-                <td class="keyword">${row.query}</td>
-                <td class="clicks">${row.clicks}</td>
-                <td class="impressions">${row.impressions}</td>
-                <td class="ctr">${parseFloat(row.ctr).toFixed(2)}%</td>
-                <td class=""positon>${parseFloat(row.position).toFixed(2)}</td>
-                <td class="search-volume"></td>
-            </tr>`;
-        });
-        $('#gsc-keywords-table tbody').html(body);
-    }
-    function renderWidgets(all, filtered){
-        $('#gsc-widgets-all').html(
-            `<div>
-				<br><h3>All Keywords</h3>
-				<br>${all.unique} keywords
-				<br>${all.clicks} clicks
-				<br>${all.impressions} impressions
-				<br>${all.ctr.toFixed(2)}% CTR
-				<br>Pos ${all.position.toFixed(2)}
-			</div>`
-        );
-        $('#gsc-widgets-highlighted').html(
-            `<div>
-				<br><h3>Highlighted Keywords</h3>
-				<br>${filtered.unique} keywords
-				<br>${filtered.clicks} clicks
-				<br>${filtered.impressions} impressions
-				<br>${filtered.ctr.toFixed(2)}% CTR
-				<br>Pos ${filtered.position.toFixed(2)}
-			</div>`
-        );
-    }
+    let body = '';
+    rows.forEach(row => {
+        let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
+        // Convert CTR decimal (e.g. 0.1234) to percentage (12.34%)
+        let ctrPercent = (parseFloat(row.ctr) * 100).toFixed(2);
+        body += `<tr class="${highlight}" data-keyword="${row.keyword}">
+            <td class="keyword">${row.query}</td>
+            <td class="clicks">${row.clicks}</td>
+            <td class="impressions">${row.impressions}</td>
+            <td class="ctr">${ctrPercent}%</td>
+            <td class="position">${parseFloat(row.position).toFixed(2)}</td>
+            <td class="search-volume"></td>
+        </tr>`;
+    });
+    $('#gsc-keywords-table tbody').html(body);
+}
+
+function renderWidgets(all, filtered){
+    // Convert CTR decimal to percentage for widgets
+    let allCtrPercent = (all.ctr * 100).toFixed(2);
+    let filteredCtrPercent = (filtered.ctr * 100).toFixed(2);
+    $('#gsc-widgets-all').html(
+        `<div>
+            <br><h3>All Keywords</h3>
+            <br>${all.unique} keywords
+            <br>${all.clicks} clicks
+            <br>${all.impressions} impressions
+            <br>${allCtrPercent}% CTR
+            <br>Pos ${all.position.toFixed(2)}
+        </div>`
+    );
+    $('#gsc-widgets-highlighted').html(
+        `<div>
+            <br><h3>Highlighted Keywords</h3>
+            <br>${filtered.unique} keywords
+            <br>${filtered.clicks} clicks
+            <br>${filtered.impressions} impressions
+            <br>${filteredCtrPercent}% CTR
+            <br>Pos ${filtered.position.toFixed(2)}
+        </div>`
+    );
+}
     function renderBuckets(buckets, buckets_high) {
         // ...implement bucket bars with percentage width and colors (see summary below)
     }
