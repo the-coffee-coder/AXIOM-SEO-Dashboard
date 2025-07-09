@@ -101,7 +101,7 @@ function scc_fetch_gsc_batch( $site_url, array $date_range, $startRow = 0, $rowL
  * @return array                [site_url => [ row1, row2, … ], …]
  * @throws Exception
  */
-function scc_fetch_gsc_data( array $site_urls, array $date_range, $rowLimit = 10000 ) {
+function scc_fetch_gsc_data( array $site_urls, array $date_range, $rowLimit = 25000 ) {
     // Build one-day spans
     $batches = [];
     $cursor  = strtotime( $date_range['startDate'] );
