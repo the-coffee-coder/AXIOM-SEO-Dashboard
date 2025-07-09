@@ -27,15 +27,16 @@ ob_start();
   <div id="gsc-table-container">
     <table id="gsc-keywords-table" class="wp-list-table widefat fixed striped">
       <thead>
-        <tr>
-          <th data-sort="keyword">Keyword</th>
-          <th data-sort="clicks">Clicks</th>
-          <th data-sort="impressions">Impressions</th>
-          <th data-sort="ctr">CTR</th>
-          <th data-sort="position">Position</th>
-          <th data-sort="search_volume">Search Volume</th>
-        </tr>
-      </thead>
+		  <tr>
+			<th class="row-number">#</th>
+			<th data-sort="keyword">Keyword</th>
+			<th data-sort="clicks">Clicks</th>
+			<th data-sort="impressions">Impressions</th>
+			<th data-sort="ctr">CTR</th>
+			<th data-sort="position">Position</th>
+			<th data-sort="search_volume">Search Volume</th>
+		  </tr>
+	  </thead>
       <tbody>
         <!-- Populated by AJAX -->
       </tbody>

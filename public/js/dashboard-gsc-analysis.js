@@ -1,7 +1,11 @@
 jQuery(function($){
-    let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = [];
-
-    function fetchData() {
+	
+let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = [];
+let currentRows = [];
+let currentFiltered = [];
+let sortState = { column: null, asc: true };
+	
+function fetchData() {
     // Try to get client_id from the dropdown first
     let client_id = $('#scc-client-select option:selected').val();
 
@@ -30,19 +34,24 @@ jQuery(function($){
         client_id, device: currentDevice,
         date_start, date_end, search, exclude
     }, function(response){
-        renderTable(response.data, response.filtered);
+        currentRows = response.data.slice();
+        currentFiltered = response.filtered.slice();
+        renderTable(currentRows, currentFiltered);
         renderWidgets(response.all_stats, response.filtered_stats);
         renderBuckets(response.buckets, response.buckets_high);
     });
 }
 
-    function renderTable(rows, filtered) {
+
+
+function renderTable(rows, filtered) {
+    currentRows = rows.slice();
     let body = '';
-    rows.forEach(row => {
+    rows.forEach((row, idx) => {
         let highlight = filtered.find(f => f.keyword === row.keyword) ? 'highlighted' : '';
-        // Convert CTR decimal (e.g. 0.1234) to percentage (12.34%)
         let ctrPercent = (parseFloat(row.ctr) * 100).toFixed(2);
         body += `<tr class="${highlight}" data-keyword="${row.keyword}">
+            <td class="row-number">${idx + 1}</td>
             <td class="keyword">${row.query}</td>
             <td class="clicks">${row.clicks}</td>
             <td class="impressions">${row.impressions}</td>
@@ -53,6 +62,39 @@ jQuery(function($){
     });
     $('#gsc-keywords-table tbody').html(body);
 }
+
+$('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
+    let sortKey = $(this).data('sort');
+    if (!sortKey) return;
+
+    if (sortState.column === sortKey) {
+        sortState.asc = !sortState.asc;
+    } else {
+        sortState.column = sortKey;
+        sortState.asc = true;
+    }
+
+    let sortedRows = currentRows.slice();
+    sortedRows.sort((a, b) => {
+        let vA = a[sortKey];
+        let vB = b[sortKey];
+
+        if (['clicks', 'impressions', 'ctr', 'position', 'search_volume'].includes(sortKey)) {
+            vA = parseFloat(vA) || 0;
+            vB = parseFloat(vB) || 0;
+        } else if (typeof vA === 'string' && typeof vB === 'string') {
+            vA = vA.toLowerCase();
+            vB = vB.toLowerCase();
+        }
+
+        if (vA < vB) return sortState.asc ? -1 : 1;
+        if (vA > vB) return sortState.asc ? 1 : -1;
+        return 0;
+    });
+
+    // Use currentFiltered for the second argument
+    renderTable(sortedRows, currentFiltered);
+});
 
 function renderWidgets(all, filtered){
     // Convert CTR decimal to percentage for widgets
