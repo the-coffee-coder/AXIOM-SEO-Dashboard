@@ -148,8 +148,8 @@ add_action( 'wp_ajax_scc_fetch_history', function(){
     check_admin_referer( 'scc_fetch_history_'.$cid );
 
     // 1 year back
-    $end   = date('Y-m-d', strtotime('-1 day'));
-    $start = date('Y-m-d', strtotime('-30 day'));
+    $end   = date('Y-m-d', strtotime('-30 day'));
+    $start = date('Y-m-d', strtotime('-61 day'));
 
     // Get client URL
     global $wpdb;
