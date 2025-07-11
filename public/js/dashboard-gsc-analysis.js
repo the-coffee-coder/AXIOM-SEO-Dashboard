@@ -1,9 +1,12 @@
 jQuery(function($){
-	
+
 let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = new Set();
 let currentRows = [];
 let currentFiltered = [];
 let sortState = { column: null, asc: true };
+
+// "lastSearchTerm" tracks the most recent keyword search
+let lastSearchTerm = '';
 
 // Sorting logic as its own function
 function getSortedRows(rows) {
@@ -51,8 +54,11 @@ function fetchData(highlightBySearch = false) {
 
     let date_start = $('#date-range-start').val();
     let date_end = $('#date-range-end').val();
-    let search = $('#gsc-keyword-search').val();
+    let search = $('#gsc-keyword-search').val(); // used only for search highlighting
     let exclude = $('#gsc-keyword-exclude').val();
+
+    // Save last search term for highlighting
+    lastSearchTerm = (highlightBySearch && search) ? search.trim().toLowerCase() : '';
 
     $.post(ajaxurl, {
         action: 'gsc_analysis_data',
@@ -61,34 +67,44 @@ function fetchData(highlightBySearch = false) {
     }, function(response){
         currentRows = response.data.slice();
         currentFiltered = response.filtered.slice();
-		
-        // Only highlight by search if this fetch was triggered by keyword search
+
+        // Sort data
         let rowsToRender = getSortedRows(currentRows);
-        renderTable(rowsToRender, currentFiltered, highlightBySearch);
-		
+
+        // Build set of keywords to highlight only for non-empty keyword search
+        let highlightSet = new Set();
+        if (highlightBySearch && lastSearchTerm !== '') {
+            rowsToRender.forEach(row => {
+                // Only highlight if keyword matches search (not exclude)
+                if (row.keyword && row.keyword.toLowerCase().includes(lastSearchTerm)) {
+                    highlightSet.add(row.keyword);
+                }
+            });
+        }
+
+        renderTable(rowsToRender, highlightSet);
+
         renderWidgets(response.all_stats, response.filtered_stats);
         renderBuckets(response.buckets, response.buckets_high);
     });
 }
 
-function renderTable(rows, filtered, highlightBySearch = false) {
-    currentRows = rows.slice();
+// Main renderTable function
+function renderTable(rows, searchHighlightSet = new Set()) {
     let body = '';
-
-    // If this render is due to a keyword search, build a set of keywords to highlight
-    let searchHighlightSet = new Set();
-    if (highlightBySearch && filtered && filtered.length) {
-        filtered.forEach(row => searchHighlightSet.add(row.keyword));
-    }
-
     rows.forEach((row, idx) => {
-        // Highlight if this row's keyword is in the highlighted set (click) or matches the searchHighlightSet (search)
-        let isClicked = highlightedKeywords.has(row.keyword);
-        let isSearchMatch = searchHighlightSet.has(row.keyword);
+        let keywordVal = row.keyword || row.query; // Support both 'keyword' and 'query'
+        let isClicked = highlightedKeywords.has(keywordVal);
 
-        let highlight = (highlightBySearch ? isSearchMatch : isClicked) ? 'highlighted' : '';
+        // Highlight on search if the row matches the lastSearchTerm
+        let isSearchMatch = false;
+        if (lastSearchTerm !== '') {
+            isSearchMatch = keywordVal && keywordVal.toLowerCase().includes(lastSearchTerm);
+        }
+
+        let highlight = (isSearchMatch || isClicked) ? 'highlighted' : '';
         let ctrPercent = (parseFloat(row.ctr) * 100).toFixed(2);
-        body += `<tr class="${highlight}" data-keyword="${row.keyword}">
+        body += `<tr class="${highlight}" data-keyword="${keywordVal}">
             <td class="row-number">${idx + 1}</td>
             <td class="keyword">${row.query}</td>
             <td class="clicks">${row.clicks}</td>
@@ -121,8 +137,17 @@ $('#gsc-keywords-table').on('click', 'th[data-sort]', function() {
     }
 
     let sortedRows = getSortedRows(currentRows);
-	
-    renderTable(sortedRows, currentFiltered);
+
+    // The current highlight set should match what was last rendered (search or click)
+    let highlightSet = new Set();
+    if (lastSearchTerm !== '') {
+        sortedRows.forEach(row => {
+            if (row.keyword && row.keyword.toLowerCase().includes(lastSearchTerm)) {
+                highlightSet.add(row.keyword);
+            }
+        });
+    }
+    renderTable(sortedRows, highlightSet);
 
     // Remove all sort classes, then add to the sorted column
     $('#gsc-keywords-table th[data-sort]')
@@ -156,64 +181,74 @@ function renderWidgets(all, filtered){
         </div>`
     );
 }
-    function renderBuckets(buckets, buckets_high) {
-        // ...implement bucket bars with percentage width and colors (see summary below)
-    }
+function renderBuckets(buckets, buckets_high) {
+    // ...implement bucket bars with percentage width and colors (see summary below)
+}
 
-    // Device filter
-    $('.gsc-device-btn').on('click', function(){
-        $('.gsc-device-btn').removeClass('active');
-        $(this).addClass('active');
-        currentDevice = $(this).data('device');
-        fetchData(false);
-    });
-
-    // Date range
-	$('#update-gsc-daterange').on('click', function(){
-		fetchData(false);
-	});
-
-    // Client select
-    $('#scc-client-select').on('change', function(){
-		fetchData(false);
-	});
-
-    // Search & reset
-    $('#gsc-keyword-search-btn').on('click', function() {
-		// After fetchData, renderTable will be called with highlightBySearch = true
-		fetchData(true);
-	});
-	
-    // Update the other calls to fetchData() (e.g. reset, device, date, etc.) to NOT highlight by search:
-	$('#gsc-keyword-reset-btn').on('click', function(){
-		$('#gsc-keyword-search, #gsc-keyword-exclude').val('');
-		showingHighlighted = false;
-		highlightedKeywords.clear(); // clear all highlights on reset
-		fetchData(false);
-	});
-
-    // Toggle highlighted
-    $('#gsc-keyword-toggle-btn').on('click', function() {
-        showingHighlighted = !showingHighlighted;
-        // toggle table rows to only show highlighted or all
-        $('#gsc-keywords-table tbody tr').each(function(){
-            if(showingHighlighted && !$(this).hasClass('highlighted')) $(this).hide();
-            else $(this).show();
-        });
-    });
-
-    // Row click highlight/unhighlight
-    $('#gsc-keywords-table').on('click', 'tbody tr', function(){
-		const keyword = $(this).data('keyword');
-		if (highlightedKeywords.has(keyword)) {
-			highlightedKeywords.delete(keyword);
-			$(this).removeClass('highlighted');
-		} else {
-			highlightedKeywords.add(keyword);
-			$(this).addClass('highlighted');
-		}
-	});
-
-    // Initial fetch
+// Device filter
+$('.gsc-device-btn').on('click', function(){
+    $('.gsc-device-btn').removeClass('active');
+    $(this).addClass('active');
+    currentDevice = $(this).data('device');
+    lastSearchTerm = '';
     fetchData(false);
+});
+
+// Date range
+$('#update-gsc-daterange').on('click', function(){
+    lastSearchTerm = '';
+    fetchData(false);
+});
+
+// Client select
+$('#scc-client-select').on('change', function(){
+    lastSearchTerm = '';
+    fetchData(false);
+});
+
+// Search button handler
+$('#gsc-keyword-search-btn').on('click', function() {
+    lastSearchTerm = $('#gsc-keyword-search').val().trim().toLowerCase();
+    fetchData(true);
+});
+
+// Reset
+$('#gsc-keyword-reset-btn').on('click', function(){
+    $('#gsc-keyword-search, #gsc-keyword-exclude').val('');
+    showingHighlighted = false;
+    highlightedKeywords.clear(); // clear all highlights on reset
+    lastSearchTerm = '';
+    fetchData(false);
+});
+
+// Toggle highlighted
+$('#gsc-keyword-toggle-btn').on('click', function(){
+    showingHighlighted = !showingHighlighted;
+    $('#gsc-keywords-table tbody tr').each(function(){
+        if(showingHighlighted && !$(this).hasClass('highlighted')) $(this).hide();
+        else $(this).show();
+    });
+    // Toggle button text
+    if (showingHighlighted) {
+        $(this).text('Show All Keywords');
+    } else {
+        $(this).text('Show Only Highlighted');
+    }
+});
+
+// Row click highlight/unhighlight
+$('#gsc-keywords-table').on('click', 'tbody tr', function(){
+    const keyword = $(this).data('keyword');
+    if (highlightedKeywords.has(keyword)) {
+        highlightedKeywords.delete(keyword);
+        $(this).removeClass('highlighted');
+    } else {
+        highlightedKeywords.add(keyword);
+        $(this).addClass('highlighted');
+    }
+});
+
+// Initial fetch
+fetchData(false);
+
 });
