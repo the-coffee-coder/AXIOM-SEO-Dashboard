@@ -1,13 +1,25 @@
 jQuery(function($){
 
-let currentDevice = 'both', showingHighlighted = false, highlightedKeywords = new Set();
+let currentDevice = 'both', 
+	showingHighlighted = false, 
+	highlightedKeywords = new Set();
 let currentRows = [];
 let currentFiltered = [];
 let sortState = { column: null, asc: true };
-
-// "lastSearchTerm" tracks the most recent keyword search
+	
 let lastSearchTerm = '';
+let lastExcludeTerm = '';
+let searchTermsArr = [];
+let excludeTermsArr = [];
 
+// Utility: split comma-separated input to array of trimmed, lowercased terms
+function parseTerms(input) {
+    return input
+        .split(',')
+        .map(t => t.trim().toLowerCase())
+        .filter(t => t.length > 0);
+}
+	
 // Sorting logic as its own function
 function getSortedRows(rows) {
     if (!sortState.column) return rows.slice(); // No sorting, return as-is
@@ -82,7 +94,7 @@ function fetchData(highlightBySearch = false) {
             });
         }
 
-        renderTable(rowsToRender, highlightSet);
+        renderTable(rowsToRender);
 
         renderWidgets(response.all_stats, response.filtered_stats);
         renderBuckets(response.buckets, response.buckets_high);
@@ -90,16 +102,26 @@ function fetchData(highlightBySearch = false) {
 }
 
 // Main renderTable function
-function renderTable(rows, searchHighlightSet = new Set()) {
+function renderTable(rows) {
     let body = '';
     rows.forEach((row, idx) => {
         let keywordVal = row.keyword || row.query; // Support both 'keyword' and 'query'
+        let keywordLower = keywordVal ? keywordVal.toLowerCase() : '';
+
         let isClicked = highlightedKeywords.has(keywordVal);
 
-        // Highlight on search if the row matches the lastSearchTerm
+        // Highlight on search if:
+        // - any search term matches
+        // - AND no exclude term matches
         let isSearchMatch = false;
-        if (lastSearchTerm !== '') {
-            isSearchMatch = keywordVal && keywordVal.toLowerCase().includes(lastSearchTerm);
+        if (searchTermsArr && searchTermsArr.length > 0) {
+            isSearchMatch = searchTermsArr.some(term => keywordLower.includes(term));
+            if (isSearchMatch && excludeTermsArr && excludeTermsArr.length > 0) {
+                // Remove highlight if any exclude matches
+                if (excludeTermsArr.some(term => keywordLower.includes(term))) {
+                    isSearchMatch = false;
+                }
+            }
         }
 
         let highlight = (isSearchMatch || isClicked) ? 'highlighted' : '';
@@ -208,7 +230,13 @@ $('#scc-client-select').on('change', function(){
 
 // Search button handler
 $('#gsc-keyword-search-btn').on('click', function() {
-    lastSearchTerm = $('#gsc-keyword-search').val().trim().toLowerCase();
+    // Get search and exclude fields as arrays of terms
+    lastSearchTerm = $('#gsc-keyword-search').val().trim();
+    lastExcludeTerm = $('#gsc-keyword-exclude').val().trim();
+
+    searchTermsArr = parseTerms(lastSearchTerm);
+    excludeTermsArr = parseTerms(lastExcludeTerm);
+
     fetchData(true);
 });
 
@@ -218,6 +246,9 @@ $('#gsc-keyword-reset-btn').on('click', function(){
     showingHighlighted = false;
     highlightedKeywords.clear(); // clear all highlights on reset
     lastSearchTerm = '';
+    lastExcludeTerm = '';
+    searchTermsArr = [];
+    excludeTermsArr = [];
     fetchData(false);
 });
 
